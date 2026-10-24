@@ -1,0 +1,8 @@
+# Archivos habituales del editor y del sistema operativo
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Informes locales generados durante pruebas
+*.log

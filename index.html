@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab de códigos de estado HTTP</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 16px; background: #f5f6f8; color: #222; line-height: 1.5; }
+    h1 { color: #0b6e4f; }
+    h2 { border-bottom: 2px solid #0b6e4f; padding-bottom: 4px; margin-top: 32px; }
+    code, pre { background: #1e1e1e; color: #9cdcfe; border-radius: 4px; }
+    code { padding: 2px 6px; }
+    pre { padding: 10px; overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; background: #fff; }
+    th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+    th { background: #0b6e4f; color: #fff; }
+    .ejercicio { background: #fff; border-left: 5px solid #0b6e4f; padding: 8px 16px; margin: 16px 0; }
+    .nota { background: #fff8e1; border-left: 5px solid #f0a500; padding: 8px 16px; }
+  </style>
+</head>
+<body>
+
+<h1>¡Funciona! Laboratorio de códigos de estado HTTP</h1>
+<p>Si ves esta página, tu servidor <strong>nginx</strong> está funcionando y te ha respondido con el código
+<strong>200 OK</strong>. Este sitio solo existe en tu equipo (<code>localhost</code>) y sirve para practicar
+con el comando <code>curl</code> desde la terminal.</p>
+
+<h2>1. ¿Qué es un código de estado?</h2>
+<p>Cada vez que pides algo a un servidor web, este te responde con un número de 3 cifras que resume
+qué pasó con tu petición. El primer dígito indica la "familia":</p>
+<table>
+  <tr><th>Familia</th><th>Significado</th><th>Ejemplo</th></tr>
+  <tr><td>1xx</td><td>Información: "sigo procesando"</td><td>100 Continue</td></tr>
+  <tr><td>2xx</td><td>Éxito: "todo bien"</td><td>200 OK, 206 Partial Content</td></tr>
+  <tr><td>3xx</td><td>Redirección: "lo que buscas está en otro sitio"</td><td>301 Moved Permanently, 304 Not Modified</td></tr>
+  <tr><td>4xx</td><td>Error del cliente: "tu petición tiene un problema"</td><td>400, 403, 404, 405, 416</td></tr>
+  <tr><td>5xx</td><td>Error del servidor: "el problema es mío"</td><td>500, 502, 503</td></tr>
+</table>
+
+<h2>2. Las opciones de curl que vamos a usar</h2>
+<table>
+  <tr><th>Opción</th><th>Qué hace</th></tr>
+  <tr><td><code>-I</code></td><td>Pide solo las cabeceras (petición HEAD). La primera línea muestra el código.</td></tr>
+  <tr><td><code>-i</code></td><td>Muestra las cabeceras <em>y</em> el contenido.</td></tr>
+  <tr><td><code>-v</code></td><td>Modo detallado: ves lo que envías (<code>&gt;</code>) y lo que recibes (<code>&lt;</code>).</td></tr>
+  <tr><td><code>-L</code></td><td>Sigue las redirecciones (3xx) automáticamente.</td></tr>
+  <tr><td><code>-X MÉTODO</code></td><td>Cambia el método HTTP (GET, POST, PUT, DELETE...).</td></tr>
+  <tr><td><code>-H "Cabecera: valor"</code></td><td>Añade o cambia una cabecera de la petición.</td></tr>
+  <tr><td><code>-s -o /dev/null -w "%{http_code}\n"</code></td><td>Modo silencioso, tira el contenido y muestra <strong>solo el código</strong>.</td></tr>
+</table>
+
+<h2>3. Ejercicios</h2>
+<p class="nota">Consejo: ejecuta cada comando, mira la primera línea de la respuesta
+(por ejemplo <code>HTTP/1.1 404 Not Found</code>) e intenta explicar <strong>por qué</strong> el servidor respondió eso.</p>
+
+<div class="ejercicio">
+  <h3>Ejercicio 1 — 200 OK</h3>
+  <p>Pedimos esta misma página. Existe y nginx puede leerla.</p>
+  <pre>curl -I http://localhost/</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Ejercicio 2 — 404 Not Found</h3>
+  <p>Pedimos un archivo que no existe.</p>
+  <pre>curl -I http://localhost/no-existe.html</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Ejercicio 3 — 301 Moved Permanently</h3>
+  <p>Pedimos una carpeta sin la barra final. nginx nos redirige a <code>/carpeta/</code>.
+  Busca la cabecera <code>Location</code>: indica a dónde nos manda.</p>
+  <pre>curl -I http://localhost/carpeta
+curl -IL http://localhost/carpeta     # con -L curl sigue la redirección</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Ejercicio 4 — 403 Forbidden (carpeta sin index)</h3>
+  <p>La carpeta existe, pero no tiene <code>index.html</code> y nginx tiene prohibido listar su contenido.</p>
+  <pre>curl -I http://localhost/privado/</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Ejercicio 5 — 403 Forbidden (permisos de Linux)</h3>
+  <p>El archivo existe, pero sus permisos no dejan leerlo al usuario de nginx (<code>www-data</code>).
+  Compáralo con <code>ls -l /var/www/html/secreto.txt</code>.</p>
+  <pre>curl -I http://localhost/secreto.txt</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Ejercicio 6 — 405 Not Allowed</h3>
+  <p>Intentamos enviar datos (POST) a una página estática. nginx no sabe qué hacer con ellos.</p>
+  <pre>curl -i -X POST http://localhost/</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Ejercicio 7 — 206 Partial Content</h3>
+  <p>Pedimos solo los primeros 100 bytes de la página (así funcionan las descargas que se pueden pausar).</p>
+  <pre>curl -i -r 0-99 http://localhost/</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Ejercicio 8 — 416 Range Not Satisfiable</h3>
+  <p>Pedimos un trozo que está más allá del final del archivo.</p>
+  <pre>curl -I -r 999999- http://localhost/</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Ejercicio 9 — 304 Not Modified</h3>
+  <p>Primero descargamos la página guardando su fecha original (<code>-R</code>). Después preguntamos
+  "¿ha cambiado desde esa fecha?" (<code>-z</code>). Como no ha cambiado, el servidor no la vuelve a enviar.
+  Así ahorran datos los navegadores con su caché.</p>
+  <pre>curl -s -R -o copia.html http://localhost/
+curl -I -z copia.html http://localhost/</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Ejercicio 10 — 400 Bad Request</h3>
+  <p>Enviamos una petición mal formada: HTTP/1.1 exige la cabecera <code>Host</code> y la mandamos vacía.</p>
+  <pre>curl -I -H "Host:" http://localhost/</pre>
+</div>
+
+<div class="ejercicio">
+  <h3>Reto final — solo el código</h3>
+  <p>Comprueba todas las rutas de golpe mostrando únicamente el número:</p>
+  <pre>for ruta in / /no-existe.html /carpeta /privado/ /secreto.txt; do
+  echo "$ruta -> $(curl -s -o /dev/null -w '%{http_code}' http://localhost$ruta)"
+done</pre>
+</div>
+
+<h2>4. ¿Y los 5xx?</h2>
+<p>Los errores 5xx aparecen cuando el servidor falla o cuando nginx reenvía la petición a otra
+aplicación que no responde (por ejemplo, <strong>502 Bad Gateway</strong>). Para provocarlos hace falta
+configuración extra, así que los veremos más adelante.</p>
+<p>Prueba esto: para nginx con <code>sudo systemctl stop nginx</code> y ejecuta
+<code>curl -I http://localhost/</code>. ¿Recibes un código? (Pista: si no hay servidor, no hay nadie que responda.)
+Vuelve a arrancarlo con <code>sudo systemctl start nginx</code>.</p>
+
+</body>
+</html>

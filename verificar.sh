@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Comprueba que el laboratorio responde con todos los códigos esperados.
+# Con "sh verificar.sh" se usaría dash: no entiende [[ ]] ni (( )) y daría un falso éxito.
+if [ -z "${BASH_VERSION:-}" ]; then
+    exec /bin/bash "$0" "$@"
+fi
 set -euo pipefail
 
 readonly BASE_URL="${BASE_URL:-http://localhost:8080}"
@@ -11,7 +15,10 @@ comprobar() {
     shift 2
 
     local obtenido
-    if ! obtenido=$(curl --silent --output /dev/null --write-out '%{http_code}' "$@"); then
+    # --noproxy: un http_proxy configurado (por ejemplo, hacia Burp) desviaría las peticiones.
+    # --max-time: sin límite, un proxy que intercepta dejaría la prueba colgada.
+    if ! obtenido=$(curl --silent --noproxy '*' --max-time 5 --output /dev/null \
+        --write-out '%{http_code}' "$@"); then
         obtenido=000
     fi
 

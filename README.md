@@ -42,6 +42,34 @@ El script solicita `sudo` cuando hace falta, instala `nginx`, `curl` e `iproute2
 si no están presentes, despliega el contenido, inicia el servicio y ejecuta una comprobación
 inicial. Después abre <http://localhost:8080/> en el navegador.
 
+## Actualizar a la última versión
+
+Si ya habías descargado el laboratorio, actualízalo con:
+
+```bash
+cd lab-nginx-codigos
+./actualizar.sh
+./instalar.sh
+```
+
+`actualizar.sh` se ejecuta sin `sudo`. Descarga la última versión y la aplica
+siempre que no choque con cambios tuyos: nunca descarta commits ni archivos que
+hayas modificado, y si los hay te indica qué hacer.
+
+Si tu copia no tiene `actualizar.sh` y `git pull` muestra un error de ramas
+divergentes («divergent branches»), descargaste el laboratorio durante la
+corrección descrita en [Historial del repositorio](#historial-del-repositorio).
+Ponlo al día así:
+
+```bash
+git fetch origin
+git reset --keep origin/main
+./actualizar.sh
+```
+
+`git reset --keep` se detiene sin cambiar nada si tienes archivos modificados que
+la actualización sobrescribiría.
+
 ## ¿Qué hace cada comando?
 
 - `git clone URL`: descarga una copia completa del repositorio.
@@ -104,11 +132,24 @@ instalador lo desactivó.
 | `instalar.sh` | Instala dependencias y despliega el laboratorio. |
 | `preparar-lab.sh` | Crea las rutas y permisos necesarios. |
 | `verificar.sh` | Comprueba automáticamente cada respuesta HTTP. |
+| `actualizar.sh` | Actualiza tu copia y limpia el historial retirado. |
 | `desinstalar.sh` | Retira el laboratorio y restaura el índice anterior. |
 | `video2.sh` | Guion interactivo para grabar la segunda parte. |
 | `index.html` | Guía visual y ejercicios del laboratorio. |
 | `nginx/lab-nginx-codigos.conf` | Sitio de nginx en `localhost:8080`. |
 | `comun.sh` | Comprobaciones de seguridad compartidas por los scripts. |
+
+## Historial del repositorio
+
+El 25 de octubre de 2026, durante unos 26 minutos (12:14–12:40 UTC), el historial
+público incluyó tres commits (`6ad8803`, `f72bad2` y `0c6535c`) con metadatos de
+autor incorrectos. Ese mismo día se sustituyeron por commits con los mismos
+cambios y la autoría correcta, y se retiraron de GitHub.
+
+Si clonaste o actualizaste el repositorio en esa franja, `actualizar.sh` los
+elimina de tu copia local, y `instalar.sh` también lo hace cada vez que se
+ejecuta. Las copias descargadas antes o después de esa franja, y las descargas en
+ZIP, no los contienen.
 
 ## Aviso
 

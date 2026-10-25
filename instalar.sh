@@ -56,6 +56,12 @@ fi
 # shellcheck source=comun.sh
 source "$DIRECTORIO_SCRIPT/comun.sh"
 
+# Si esta copia aún contiene los commits retirados del historial público, se eliminan
+# de .git sin tocar los archivos del laboratorio (ver "Historial del repositorio" en el README).
+if [[ -f "$DIRECTORIO_SCRIPT/actualizar.sh" ]]; then
+    /bin/bash "$DIRECTORIO_SCRIPT/actualizar.sh" --limpiar || true
+fi
+
 # Comprobaciones previas: si algo no cuadra, se aborta antes de instalar paquetes
 # o de modificar nada. preparar-lab.sh las repite por si se ejecuta por separado.
 if command -v ss >/dev/null 2>&1; then

@@ -78,24 +78,9 @@ else
 fi
 echo "[+] nginx: $(systemctl is-active nginx)"
 
-# 8. Verificación: cada ruta con el código que esperamos
+# 8. Verificación: si alguna ruta no responde con el código esperado, el script falla
 echo
-echo "Ruta                               Esperado  Obtenido"
-comprobar() {
-    local esperado=$1; shift
-    local obtenido
-    obtenido=$(curl -s -o /dev/null -w '%{http_code}' "$@")
-    printf '%-34s %-9s %s\n' "${*: -1}" "$esperado" "$obtenido"
-}
-comprobar 200 http://localhost:$PUERTO/
-comprobar 404 http://localhost:$PUERTO/no-existe.html
-comprobar 301 http://localhost:$PUERTO/carpeta
-comprobar 403 http://localhost:$PUERTO/privado/
-comprobar 403 http://localhost:$PUERTO/secreto.txt
-comprobar 405 -X POST http://localhost:$PUERTO/
-comprobar 206 -r 0-99 http://localhost:$PUERTO/
-comprobar 416 -r 999999- http://localhost:$PUERTO/
-comprobar 400 -H "Host:" http://localhost:$PUERTO/
+bash "$ORIGEN/verificar.sh"
 
 echo
 echo "Laboratorio disponible en http://localhost:$PUERTO/"

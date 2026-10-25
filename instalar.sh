@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Instala las dependencias y despliega el laboratorio de forma no interactiva.
+# Con "sh instalar.sh" se usaría dash, que no entiende la sintaxis de bash.
+if [ -z "${BASH_VERSION:-}" ]; then
+    exec bash "$0" "$@"
+fi
 set -euo pipefail
 
 # nginx vive en /usr/sbin; con "su" (sin "-") o algunos sudo esa ruta no está en PATH.
@@ -19,6 +23,8 @@ error() {
     printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2
 }
 
+trap 'error "La instalación falló en la línea $LINENO. Revisa los mensajes anteriores."' ERR
+
 # Reejecuta únicamente la parte privilegiada con sudo si el usuario no es root.
 if [[ $EUID -ne 0 ]]; then
     if ! command -v sudo >/dev/null 2>&1; then
@@ -26,7 +32,7 @@ if [[ $EUID -ne 0 ]]; then
         exit 1
     fi
     info "Se solicitarán permisos de administrador para instalar y configurar nginx."
-    exec sudo -- "$0" "$@"
+    exec sudo -- bash "$(readlink -f -- "${BASH_SOURCE[0]}")" "$@"
 fi
 
 if [[ ! -r /etc/os-release ]]; then
@@ -45,6 +51,7 @@ fi
 paquetes=()
 command -v nginx >/dev/null 2>&1 || paquetes+=(nginx)
 command -v curl >/dev/null 2>&1 || paquetes+=(curl)
+command -v ss >/dev/null 2>&1 || paquetes+=(iproute2)
 
 if (( ${#paquetes[@]} > 0 )); then
     info "Actualizando el índice de paquetes..."
@@ -52,7 +59,7 @@ if (( ${#paquetes[@]} > 0 )); then
     info "Instalando: ${paquetes[*]}"
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${paquetes[@]}"
 else
-    correcto "nginx y curl ya están instalados."
+    correcto "nginx, curl y ss ya están instalados."
 fi
 
 info "Desplegando el laboratorio..."

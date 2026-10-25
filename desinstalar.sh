@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Retira únicamente los archivos identificados como parte del laboratorio.
+# Con "sh desinstalar.sh" se usaría dash, que no entiende la sintaxis de bash.
+if [ -z "${BASH_VERSION:-}" ]; then
+    exec bash "$0" "$@"
+fi
 set -euo pipefail
 
 # nginx vive en /usr/sbin; con "su" (sin "-") o algunos sudo esa ruta no está en PATH.
@@ -14,7 +18,7 @@ if [[ $EUID -ne 0 ]]; then
         echo "ERROR: se necesitan permisos administrativos." >&2
         exit 1
     fi
-    exec sudo -- "$0" "$@"
+    exec sudo -- bash "$(readlink -f -- "${BASH_SOURCE[0]}")" "$@"
 fi
 
 if [[ ! -f "$MARCADOR" ]]; then

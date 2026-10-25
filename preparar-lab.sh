@@ -3,6 +3,9 @@
 # Uso: sudo ./preparar-lab.sh
 set -euo pipefail
 
+# nginx vive en /usr/sbin; con "su" (sin "-") o algunos sudo esa ruta no está en PATH.
+export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
+
 readonly WEB=/var/www/html
 readonly ORIGEN="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly MARCADOR="$WEB/.lab-nginx-codigos"

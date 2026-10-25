@@ -2,6 +2,9 @@
 # Instala las dependencias y despliega el laboratorio de forma no interactiva.
 set -euo pipefail
 
+# nginx vive en /usr/sbin; con "su" (sin "-") o algunos sudo esa ruta no está en PATH.
+export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
+
 readonly DIRECTORIO_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 info() {

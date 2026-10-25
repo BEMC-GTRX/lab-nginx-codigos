@@ -4,9 +4,14 @@ Laboratorio local para aprender y practicar los códigos HTTP `200`, `206`, `301
 `400`, `403`, `404`, `405` y `416` con **nginx** y **curl**. Está pensado para
 Parrot OS, Debian y distribuciones derivadas.
 
-> Este proyecto modifica únicamente archivos concretos dentro de `/var/www/html`.
+> Este proyecto modifica únicamente archivos concretos dentro de `/var/www/html`
+> y añade el sitio `/etc/nginx/sites-available/lab-nginx-codigos.conf`.
 > La primera vez conserva el `index.html` anterior como
 > `/var/www/html/index.html.bak-apache`.
+
+El laboratorio se publica en el **puerto 8080** y solo escucha en `localhost`,
+así que no choca con otros sitios que nginx sirva en el puerto 80 y no es
+accesible desde la red.
 
 ## Instalación rápida
 
@@ -18,7 +23,7 @@ cd lab-nginx-codigos
 
 El script solicita `sudo` cuando hace falta, instala `nginx` y `curl` si no están
 presentes, despliega el contenido, inicia el servicio y ejecuta una comprobación
-inicial. Después abre <http://localhost/> en el navegador.
+inicial. Después abre <http://localhost:8080/> en el navegador.
 
 ## ¿Qué hace cada comando?
 
@@ -26,7 +31,8 @@ inicial. Después abre <http://localhost/> en el navegador.
 - `cd lab-nginx-codigos`: entra en la carpeta descargada.
 - `./instalar.sh`: ejecuta el instalador incluido en el proyecto.
 - `sudo`: concede permisos administrativos solo para instalar paquetes, escribir
-  en `/var/www/html` y controlar el servicio nginx.
+  en `/var/www/html`, publicar el sitio en `/etc/nginx` y controlar el servicio
+  nginx.
 
 No es recomendable trabajar habitualmente como `root`. El instalador puede
 ejecutarse desde un usuario normal y solicitará la contraseña únicamente cuando
@@ -66,8 +72,8 @@ y comprueba el contenido de `/var/www/html` antes de comenzar otra toma.
 ./desinstalar.sh
 ```
 
-El script solo retira las rutas creadas por el laboratorio y restaura la copia de
-seguridad del `index.html`. Deja nginx instalado y en ejecución porque podría
+El script solo retira las rutas creadas por el laboratorio, el sitio del puerto
+8080 y restaura la copia de seguridad del `index.html`. Deja nginx instalado y en ejecución porque podría
 estar sirviendo otros proyectos.
 
 ## Archivos principales
@@ -80,6 +86,7 @@ estar sirviendo otros proyectos.
 | `desinstalar.sh` | Retira el laboratorio y restaura el índice anterior. |
 | `video2.sh` | Guion interactivo para grabar la segunda parte. |
 | `index.html` | Guía visual y ejercicios del laboratorio. |
+| `nginx/lab-nginx-codigos.conf` | Sitio de nginx en `localhost:8080`. |
 
 ## Aviso
 

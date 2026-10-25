@@ -59,6 +59,6 @@ info "Desplegando el laboratorio..."
 bash "$DIRECTORIO_SCRIPT/preparar-lab.sh"
 
 printf '\n'
-correcto "Laboratorio listo en http://localhost/"
+correcto "Laboratorio listo en http://localhost:8080/"
 printf 'Para repetir la explicación guiada: %s\n' \
     "cd '$DIRECTORIO_SCRIPT' && sudo ./video2.sh"

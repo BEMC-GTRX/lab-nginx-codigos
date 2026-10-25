@@ -9,18 +9,28 @@ export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
 readonly WEB=/var/www/html
 readonly ORIGEN="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly MARCADOR="$WEB/.lab-nginx-codigos"
+readonly PUERTO=8080
+readonly SITIO=lab-nginx-codigos.conf
+readonly SITIO_DISPONIBLE="/etc/nginx/sites-available/$SITIO"
+readonly SITIO_ACTIVO="/etc/nginx/sites-enabled/$SITIO"
 
 if [[ $EUID -ne 0 ]]; then
     echo "ERROR: ejecuta este script con sudo: sudo ./preparar-lab.sh" >&2
     exit 1
 fi
 
-for comando in nginx curl systemctl install; do
+for comando in nginx curl systemctl install ss; do
     if ! command -v "$comando" >/dev/null 2>&1; then
         echo "ERROR: falta el comando '$comando'. Ejecuta primero ./instalar.sh" >&2
         exit 1
     fi
 done
+
+# Si otro programa ya usa el puerto, se aborta antes de modificar nada.
+if [[ ! -L "$SITIO_ACTIVO" ]] && ss -Hltn "sport = :$PUERTO" | grep -q .; then
+    echo "ERROR: el puerto $PUERTO ya está en uso por otro programa." >&2
+    exit 1
+fi
 
 install -d -m 755 "$WEB"
 
@@ -49,11 +59,26 @@ printf 'Instalado por lab-nginx-codigos.\n' > "$MARCADOR"
 chmod 644 "$MARCADOR"
 echo "[+] carpeta/, privado/ y secreto.txt creados"
 
-# 6. Arrancar nginx si está parado
-systemctl start nginx
+# 6. Publicar el sitio del laboratorio en el puerto 8080
+install -m 644 "$ORIGEN/nginx/$SITIO" "$SITIO_DISPONIBLE"
+ln -sfn "$SITIO_DISPONIBLE" "$SITIO_ACTIVO"
+if ! nginx -t -q; then
+    # Se retira el sitio para no dejar nginx con una configuración rota.
+    rm -f -- "$SITIO_ACTIVO" "$SITIO_DISPONIBLE"
+    echo "ERROR: la configuración de nginx no es válida; se retiró el sitio del laboratorio." >&2
+    exit 1
+fi
+echo "[+] Sitio publicado en $SITIO_ACTIVO"
+
+# 7. Arrancar nginx si está parado o recargarlo para aplicar el sitio nuevo
+if systemctl is-active --quiet nginx; then
+    systemctl reload nginx
+else
+    systemctl start nginx
+fi
 echo "[+] nginx: $(systemctl is-active nginx)"
 
-# 7. Verificación: cada ruta con el código que esperamos
+# 8. Verificación: cada ruta con el código que esperamos
 echo
 echo "Ruta                               Esperado  Obtenido"
 comprobar() {
@@ -62,15 +87,15 @@ comprobar() {
     obtenido=$(curl -s -o /dev/null -w '%{http_code}' "$@")
     printf '%-34s %-9s %s\n' "${*: -1}" "$esperado" "$obtenido"
 }
-comprobar 200 http://localhost/
-comprobar 404 http://localhost/no-existe.html
-comprobar 301 http://localhost/carpeta
-comprobar 403 http://localhost/privado/
-comprobar 403 http://localhost/secreto.txt
-comprobar 405 -X POST http://localhost/
-comprobar 206 -r 0-99 http://localhost/
-comprobar 416 -r 999999- http://localhost/
-comprobar 400 -H "Host:" http://localhost/
+comprobar 200 http://localhost:$PUERTO/
+comprobar 404 http://localhost:$PUERTO/no-existe.html
+comprobar 301 http://localhost:$PUERTO/carpeta
+comprobar 403 http://localhost:$PUERTO/privado/
+comprobar 403 http://localhost:$PUERTO/secreto.txt
+comprobar 405 -X POST http://localhost:$PUERTO/
+comprobar 206 -r 0-99 http://localhost:$PUERTO/
+comprobar 416 -r 999999- http://localhost:$PUERTO/
+comprobar 400 -H "Host:" http://localhost:$PUERTO/
 
 echo
-echo "Laboratorio disponible en http://localhost/"
+echo "Laboratorio disponible en http://localhost:$PUERTO/"

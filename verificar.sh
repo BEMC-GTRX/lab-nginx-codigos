@@ -2,7 +2,7 @@
 # Comprueba que el laboratorio responde con todos los códigos esperados.
 set -euo pipefail
 
-readonly BASE_URL="${BASE_URL:-http://localhost}"
+readonly BASE_URL="${BASE_URL:-http://localhost:8080}"
 fallos=0
 
 comprobar() {

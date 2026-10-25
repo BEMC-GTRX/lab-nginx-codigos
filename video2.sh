@@ -4,7 +4,12 @@
 # Uso: cd /root/lab-nginx-codigos && sudo ./video2.sh
 set -euo pipefail
 
+# nginx vive en /usr/sbin; con "su" (sin "-") o algunos sudo esa ruta no está en PATH.
+export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
+
 WEB=/var/www/html
+SITIO=lab-nginx-codigos.conf
+URL=http://localhost:8080
 LAB="$(cd "$(dirname "$0")" && pwd)"
 VELOCIDAD=0.04   # segundos entre letras; súbelo para teclear más despacio
 
@@ -45,34 +50,44 @@ titulo "Parte 2: personalizar el index de nginx"
 explica "En el vídeo anterior instalamos nginx. Comprobamos que sigue funcionando:"
 ejecuta "systemctl is-active nginx"
 
+# ------------------------------------------------------------------
+titulo "Paso 1: publicar un sitio en el puerto 8080"
+explica "Usamos el puerto 8080 para no chocar con otros sitios del puerto 80."
+explica "Este es el sitio del laboratorio; solo escucha en localhost:"
+ejecuta "cat $LAB/nginx/$SITIO"
+explica "Lo copiamos a sites-available y lo activamos con un enlace en sites-enabled:"
+ejecuta "install -m 644 $LAB/nginx/$SITIO /etc/nginx/sites-available/$SITIO"
+ejecuta "ln -sfn /etc/nginx/sites-available/$SITIO /etc/nginx/sites-enabled/$SITIO"
+explica "Antes de recargar, nginx -t comprueba que la configuración es válida:"
+ejecuta "nginx -t && systemctl reload nginx"
 explica "¿Qué página nos está sirviendo ahora mismo? Miramos su título:"
-ejecuta "curl -s http://localhost | grep -o '<title>.*</title>'"
+ejecuta "curl -s $URL | grep -o '<title>.*</title>'"
 
 # ------------------------------------------------------------------
-titulo "Paso 1: ¿dónde están los archivos de la web?"
+titulo "Paso 2: ¿dónde están los archivos de la web?"
 explica "nginx sirve los archivos de la carpeta indicada en 'root' de su configuración:"
-ejecuta "grep -E '^\s*(root|index)' /etc/nginx/sites-enabled/default"
+ejecuta "grep -E '^\s*(root|index)' /etc/nginx/sites-enabled/$SITIO"
 explica "Busca index.html primero. Veamos qué hay en /var/www/html:"
 ejecuta "ls -l $WEB"
 explica "Ese index.html es la página por defecto de Apache. ¡La vamos a sustituir!"
 read -rp "↵ Enter para continuar..." _
 
 # ------------------------------------------------------------------
-titulo "Paso 2: copia de seguridad (antes de cambiar nada)"
+titulo "Paso 3: copia de seguridad (antes de cambiar nada)"
 explica "cp -p copia el archivo conservando permisos y fechas."
 ejecuta "cp -p $WEB/index.html $WEB/index.html.bak-apache"
 ejecuta "ls -l $WEB"
 
 # ------------------------------------------------------------------
-titulo "Paso 3: instalar nuestro index.html del laboratorio"
+titulo "Paso 4: instalar nuestro index.html del laboratorio"
 explica "Este es el index que preparamos (vemos el principio):"
 ejecuta "head -n 25 $LAB/index.html"
 explica "Lo copiamos con permisos 644: el dueño escribe, todos pueden leer (también nginx)."
 ejecuta "install -m 644 $LAB/index.html $WEB/index.html"
-ejecuta "curl -s http://localhost | grep -o '<title>.*</title>'"
+ejecuta "curl -s $URL | grep -o '<title>.*</title>'"
 
 # ------------------------------------------------------------------
-titulo "Paso 4: preparar rutas para practicar códigos de estado"
+titulo "Paso 5: preparar rutas para practicar códigos de estado"
 explica "Una carpeta CON index: al pedirla sin '/' final, nginx responde 301."
 ejecuta "mkdir -p $WEB/carpeta && echo '<h1>Has llegado a /carpeta/</h1>' > $WEB/carpeta/index.html"
 explica "Una carpeta SIN index: nginx no lista su contenido y responde 403."
@@ -82,11 +97,11 @@ ejecuta "echo 'secreto' > $WEB/secreto.txt && chmod 600 $WEB/secreto.txt"
 ejecuta "ls -l $WEB"
 
 # ------------------------------------------------------------------
-titulo "Paso 5: comprobación rápida"
+titulo "Paso 6: comprobación rápida"
 explica "Pedimos cada ruta y mostramos solo el código de estado:"
-ejecuta "for r in / /no-existe.html /carpeta /privado/ /secreto.txt; do echo \"\$r -> \$(curl -s -o /dev/null -w '%{http_code}' http://localhost\$r)\"; done"
+ejecuta "for r in / /no-existe.html /carpeta /privado/ /secreto.txt; do echo \"\$r -> \$(curl -s -o /dev/null -w '%{http_code}' $URL\$r)\"; done"
 
 # ------------------------------------------------------------------
 titulo "¡Listo!"
-explica "Abre el navegador en http://localhost para ver la guía del laboratorio."
+explica "Abre el navegador en $URL para ver la guía del laboratorio."
 explica "En el próximo vídeo analizaremos cada código de estado con curl."

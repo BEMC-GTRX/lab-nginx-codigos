@@ -56,52 +56,52 @@ qué pasó con tu petición. El primer dígito indica la "familia":</p>
 <div class="ejercicio">
   <h3>Ejercicio 1 — 200 OK</h3>
   <p>Pedimos esta misma página. Existe y nginx puede leerla.</p>
-  <pre>curl -I http://localhost/</pre>
+  <pre>curl -I http://localhost:8080/</pre>
 </div>
 
 <div class="ejercicio">
   <h3>Ejercicio 2 — 404 Not Found</h3>
   <p>Pedimos un archivo que no existe.</p>
-  <pre>curl -I http://localhost/no-existe.html</pre>
+  <pre>curl -I http://localhost:8080/no-existe.html</pre>
 </div>
 
 <div class="ejercicio">
   <h3>Ejercicio 3 — 301 Moved Permanently</h3>
   <p>Pedimos una carpeta sin la barra final. nginx nos redirige a <code>/carpeta/</code>.
   Busca la cabecera <code>Location</code>: indica a dónde nos manda.</p>
-  <pre>curl -I http://localhost/carpeta
-curl -IL http://localhost/carpeta     # con -L curl sigue la redirección</pre>
+  <pre>curl -I http://localhost:8080/carpeta
+curl -IL http://localhost:8080/carpeta     # con -L curl sigue la redirección</pre>
 </div>
 
 <div class="ejercicio">
   <h3>Ejercicio 4 — 403 Forbidden (carpeta sin index)</h3>
   <p>La carpeta existe, pero no tiene <code>index.html</code> y nginx tiene prohibido listar su contenido.</p>
-  <pre>curl -I http://localhost/privado/</pre>
+  <pre>curl -I http://localhost:8080/privado/</pre>
 </div>
 
 <div class="ejercicio">
   <h3>Ejercicio 5 — 403 Forbidden (permisos de Linux)</h3>
   <p>El archivo existe, pero sus permisos no dejan leerlo al usuario de nginx (<code>www-data</code>).
   Compáralo con <code>ls -l /var/www/html/secreto.txt</code>.</p>
-  <pre>curl -I http://localhost/secreto.txt</pre>
+  <pre>curl -I http://localhost:8080/secreto.txt</pre>
 </div>
 
 <div class="ejercicio">
   <h3>Ejercicio 6 — 405 Not Allowed</h3>
   <p>Intentamos enviar datos (POST) a una página estática. nginx no sabe qué hacer con ellos.</p>
-  <pre>curl -i -X POST http://localhost/</pre>
+  <pre>curl -i -X POST http://localhost:8080/</pre>
 </div>
 
 <div class="ejercicio">
   <h3>Ejercicio 7 — 206 Partial Content</h3>
   <p>Pedimos solo los primeros 100 bytes de la página (así funcionan las descargas que se pueden pausar).</p>
-  <pre>curl -i -r 0-99 http://localhost/</pre>
+  <pre>curl -i -r 0-99 http://localhost:8080/</pre>
 </div>
 
 <div class="ejercicio">
   <h3>Ejercicio 8 — 416 Range Not Satisfiable</h3>
   <p>Pedimos un trozo que está más allá del final del archivo.</p>
-  <pre>curl -I -r 999999- http://localhost/</pre>
+  <pre>curl -I -r 999999- http://localhost:8080/</pre>
 </div>
 
 <div class="ejercicio">
@@ -109,21 +109,21 @@ curl -IL http://localhost/carpeta     # con -L curl sigue la redirección</pre>
   <p>Primero descargamos la página guardando su fecha original (<code>-R</code>). Después preguntamos
   "¿ha cambiado desde esa fecha?" (<code>-z</code>). Como no ha cambiado, el servidor no la vuelve a enviar.
   Así ahorran datos los navegadores con su caché.</p>
-  <pre>curl -s -R -o copia.html http://localhost/
-curl -I -z copia.html http://localhost/</pre>
+  <pre>curl -s -R -o copia.html http://localhost:8080/
+curl -I -z copia.html http://localhost:8080/</pre>
 </div>
 
 <div class="ejercicio">
   <h3>Ejercicio 10 — 400 Bad Request</h3>
   <p>Enviamos una petición mal formada: HTTP/1.1 exige la cabecera <code>Host</code> y la mandamos vacía.</p>
-  <pre>curl -I -H "Host:" http://localhost/</pre>
+  <pre>curl -I -H "Host:" http://localhost:8080/</pre>
 </div>
 
 <div class="ejercicio">
   <h3>Reto final — solo el código</h3>
   <p>Comprueba todas las rutas de golpe mostrando únicamente el número:</p>
   <pre>for ruta in / /no-existe.html /carpeta /privado/ /secreto.txt; do
-  echo "$ruta -> $(curl -s -o /dev/null -w '%{http_code}' http://localhost$ruta)"
+  echo "$ruta -> $(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080$ruta)"
 done</pre>
 </div>
 
@@ -132,7 +132,7 @@ done</pre>
 aplicación que no responde (por ejemplo, <strong>502 Bad Gateway</strong>). Para provocarlos hace falta
 configuración extra, así que los veremos más adelante.</p>
 <p>Prueba esto: para nginx con <code>sudo systemctl stop nginx</code> y ejecuta
-<code>curl -I http://localhost/</code>. ¿Recibes un código? (Pista: si no hay servidor, no hay nadie que responda.)
+<code>curl -I http://localhost:8080/</code>. ¿Recibes un código? (Pista: si no hay servidor, no hay nadie que responda.)
 Vuelve a arrancarlo con <code>sudo systemctl start nginx</code>.</p>
 
 </body>

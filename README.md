@@ -48,16 +48,17 @@ Si ya habías descargado el laboratorio, actualízalo con:
 
 ```bash
 cd lab-nginx-codigos
-./actualizar.sh
+git pull
 ./instalar.sh
 ```
 
-`actualizar.sh` se ejecuta sin `sudo`. Descarga la última versión y la aplica
+A partir de esta versión también puedes actualizar con `./actualizar.sh` en lugar
+de `git pull`. Se ejecuta sin `sudo`, descarga la última versión y la aplica
 siempre que no choque con cambios tuyos: nunca descarta commits ni archivos que
 hayas modificado, y si los hay te indica qué hacer.
 
-Si tu copia no tiene `actualizar.sh` y `git pull` muestra un error de ramas
-divergentes («divergent branches»), descargaste el laboratorio durante la
+Si `git pull` muestra un error de ramas divergentes («divergent branches»),
+descargaste el laboratorio durante la
 corrección descrita en [Historial del repositorio](#historial-del-repositorio).
 Ponlo al día así:
 

@@ -113,3 +113,5 @@ info "Desplegando el laboratorio..."
 
 printf '\n'
 correcto "Laboratorio listo en http://localhost:8080/"
+printf 'Para repetir la ayuda autoguiada: %s\n' \
+    "cd '$DIRECTORIO_SCRIPT' && sudo ./ayuda-autoguiada-montar-lab.sh"

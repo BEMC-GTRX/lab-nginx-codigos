@@ -100,6 +100,22 @@ systemctl status nginx --no-pager
 `systemctl status` muestra el estado del servicio y `--no-pager` imprime el
 resultado directamente, sin abrir el visor interactivo.
 
+## Ayuda autoguiada: montar el laboratorio
+
+`ayuda-autoguiada-montar-lab.sh` monta el laboratorio paso a paso y explica
+cada comando antes de ejecutarlo: publica el sitio en el puerto 8080, guarda
+una copia del `index.html` original, instala el del laboratorio y crea las rutas
+para practicar los códigos:
+
+```bash
+cd lab-nginx-codigos
+sudo ./ayuda-autoguiada-montar-lab.sh
+```
+
+La ayuda requiere que `/var/www/html/index.html.bak-apache` no exista. Si antes
+utilizaste el instalador o ya la ejecutaste, restaura el estado inicial con
+`./desinstalar.sh` antes de comenzar.
+
 ## Desinstalación
 
 ```bash
@@ -122,6 +138,7 @@ instalador lo desactivó.
 | `verificar.sh` | Comprueba automáticamente cada respuesta HTTP. |
 | `actualizar.sh` | Actualiza tu copia y limpia el historial retirado. |
 | `desinstalar.sh` | Retira el laboratorio y restaura el índice anterior. |
+| `ayuda-autoguiada-montar-lab.sh` | Ayuda autoguiada que monta el laboratorio paso a paso. |
 | `index.html` | Guía visual y ejercicios del laboratorio. |
 | `nginx/lab-nginx-codigos.conf` | Sitio de nginx en `localhost:8080`. |
 | `comun.sh` | Comprobaciones de seguridad compartidas por los scripts. |

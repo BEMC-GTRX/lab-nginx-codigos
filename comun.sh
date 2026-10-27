@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Constantes y funciones compartidas por instalar.sh, preparar-lab.sh y desinstalar.sh.
+# Constantes y funciones compartidas por instalar.sh, preparar-lab.sh,
+# ayuda-autoguiada-montar-lab.sh y desinstalar.sh.
 # Se carga con "source"; no se ejecuta directamente.
 
 readonly WEB=/var/www/html

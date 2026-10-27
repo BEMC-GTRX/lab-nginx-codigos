@@ -100,19 +100,6 @@ systemctl status nginx --no-pager
 `systemctl status` muestra el estado del servicio y `--no-pager` imprime el
 resultado directamente, sin abrir el visor interactivo.
 
-## Tutorial interactivo de la parte 2
-
-`video2.sh` reproduce paso a paso la explicación usada en el vídeo:
-
-```bash
-cd lab-nginx-codigos
-sudo ./video2.sh
-```
-
-La demostración requiere que `/var/www/html/index.html.bak-apache` no exista. Si
-antes utilizaste el instalador o grabaste otra toma, restaura el estado inicial
-con `./desinstalar.sh` antes de comenzar.
-
 ## Desinstalación
 
 ```bash
@@ -135,7 +122,6 @@ instalador lo desactivó.
 | `verificar.sh` | Comprueba automáticamente cada respuesta HTTP. |
 | `actualizar.sh` | Actualiza tu copia y limpia el historial retirado. |
 | `desinstalar.sh` | Retira el laboratorio y restaura el índice anterior. |
-| `video2.sh` | Guion interactivo para grabar la segunda parte. |
 | `index.html` | Guía visual y ejercicios del laboratorio. |
 | `nginx/lab-nginx-codigos.conf` | Sitio de nginx en `localhost:8080`. |
 | `comun.sh` | Comprobaciones de seguridad compartidas por los scripts. |

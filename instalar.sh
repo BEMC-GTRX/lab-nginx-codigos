@@ -113,5 +113,3 @@ info "Desplegando el laboratorio..."
 
 printf '\n'
 correcto "Laboratorio listo en http://localhost:8080/"
-printf 'Para repetir la explicación guiada: %s\n' \
-    "cd '$DIRECTORIO_SCRIPT' && sudo ./video2.sh"

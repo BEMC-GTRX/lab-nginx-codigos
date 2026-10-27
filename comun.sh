@@ -1,6 +1,6 @@
 # shellcheck shell=bash
-# Constantes y funciones compartidas por instalar.sh, preparar-lab.sh, video2.sh y
-# desinstalar.sh. Se carga con "source"; no se ejecuta directamente.
+# Constantes y funciones compartidas por instalar.sh, preparar-lab.sh y desinstalar.sh.
+# Se carga con "source"; no se ejecuta directamente.
 
 readonly WEB=/var/www/html
 readonly MARCADOR="$WEB/.lab-nginx-codigos"

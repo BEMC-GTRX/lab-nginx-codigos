@@ -22,12 +22,14 @@ comprobar() {
         obtenido=000
     fi
 
+    # printf rellena por bytes y las tildes ocupan dos: se rellena contando caracteres.
+    local relleno=$((28 - ${#descripcion}))
     if [[ "$obtenido" == "$esperado" ]]; then
-        printf '\033[1;32m[OK]\033[0m %-28s esperado=%s obtenido=%s\n' \
-            "$descripcion" "$esperado" "$obtenido"
+        printf '\033[1;32m[OK]\033[0m %s%*s esperado=%s obtenido=%s\n' \
+            "$descripcion" "$relleno" '' "$esperado" "$obtenido"
     else
-        printf '\033[1;31m[FALLO]\033[0m %-25s esperado=%s obtenido=%s\n' \
-            "$descripcion" "$esperado" "$obtenido" >&2
+        printf '\033[1;31m[FALLO]\033[0m %s%*s esperado=%s obtenido=%s\n' \
+            "$descripcion" "$((relleno - 3))" '' "$esperado" "$obtenido" >&2
         fallos=$((fallos + 1))
     fi
 }

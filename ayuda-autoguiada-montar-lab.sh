@@ -45,10 +45,10 @@ if ! systemctl is-active --quiet nginx; then
     exit 1
 fi
 
-# Protección: si ya existe la copia, la ayuda ya se ejecutó y la sobrescribiríamos
+# Protección: si ya existe la copia, el laboratorio ya se montó y la sobrescribiríamos
 # con el index del lab (perdiendo la página original). Hay que reiniciar primero.
 if [[ -e "$WEB/index.html.bak-apache" ]]; then
-    echo "ERROR: $WEB/index.html.bak-apache ya existe: la ayuda ya se ejecutó."
+    echo "ERROR: $WEB/index.html.bak-apache ya existe: el laboratorio ya se montó (con la ayuda o con ./instalar.sh)."
     echo "Restaura el estado con ./desinstalar.sh antes de volver a ejecutarla."
     exit 1
 fi

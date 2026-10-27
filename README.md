@@ -1,8 +1,8 @@
 # Laboratorio de códigos de estado HTTP con nginx
 
 Laboratorio local para aprender y practicar los códigos HTTP `200`, `206`, `301`,
-`400`, `403`, `404`, `405` y `416` con **nginx** y **curl**. Está pensado para
-Parrot OS, Debian y distribuciones derivadas.
+`304`, `400`, `403`, `404`, `405` y `416` con **nginx** y **curl**. Está pensado
+para Parrot OS, Debian y distribuciones derivadas.
 
 ## Qué cambia en el sistema
 
@@ -110,6 +110,15 @@ para practicar los códigos:
 ```bash
 cd lab-nginx-codigos
 sudo ./ayuda-autoguiada-montar-lab.sh
+```
+
+Es una alternativa a `./instalar.sh` para ver qué hace cada paso, pero no
+instala paquetes: necesita `nginx`, `curl` e `iproute2` ya instalados y nginx en
+marcha. Si te falta alguno:
+
+```bash
+sudo apt install nginx curl iproute2
+sudo systemctl start nginx
 ```
 
 La ayuda requiere que `/var/www/html/index.html.bak-apache` no exista. Si antes

@@ -2,7 +2,7 @@
 # Ayuda autoguiada para montar el laboratorio paso a paso: publica el sitio en el puerto 8080,
 # guarda una copia del index.html, instala el del laboratorio y crea las rutas de práctica.
 # Escribe cada comando "como si se tecleara", lo ejecuta y espera Enter antes de seguir.
-# Uso: cd /root/lab-nginx-codigos && sudo ./ayuda-autoguiada-montar-lab.sh
+# Uso: cd lab-nginx-codigos && sudo ./ayuda-autoguiada-montar-lab.sh
 # Con "sh ayuda-autoguiada-montar-lab.sh" se usaría dash, que no entiende la sintaxis de bash.
 if [ -z "${BASH_VERSION:-}" ]; then
     exec /bin/bash "$0" "$@"
@@ -28,21 +28,34 @@ URL="http://localhost:$PUERTO"
 VELOCIDAD=0.04   # segundos entre letras; súbelo para teclear más despacio
 
 if [[ $EUID -ne 0 ]]; then
-    echo "ERROR: ejecuta la demo con sudo: sudo ./ayuda-autoguiada-montar-lab.sh" >&2
+    echo "ERROR: ejecuta la ayuda con sudo: sudo ./ayuda-autoguiada-montar-lab.sh" >&2
     exit 1
 fi
 
-# Protección: si ya existe la copia, la demo ya se ejecutó y la sobrescribiríamos
+# La ayuda no instala paquetes: nginx, curl y ss (iproute2) tienen que estar ya
+# instalados, y nginx en marcha para poder recargarlo.
+for programa in nginx curl ss; do
+    if ! command -v "$programa" >/dev/null 2>&1; then
+        echo "ERROR: falta $programa. Instálalo con: sudo apt install nginx curl iproute2" >&2
+        exit 1
+    fi
+done
+if ! systemctl is-active --quiet nginx; then
+    echo "ERROR: nginx no está en marcha. Arráncalo con: sudo systemctl start nginx" >&2
+    exit 1
+fi
+
+# Protección: si ya existe la copia, la ayuda ya se ejecutó y la sobrescribiríamos
 # con el index del lab (perdiendo la página original). Hay que reiniciar primero.
 if [[ -e "$WEB/index.html.bak-apache" ]]; then
-    echo "ERROR: $WEB/index.html.bak-apache ya existe: la demo ya se ejecutó."
-    echo "Restaura el estado con ./desinstalar.sh antes de grabar otra toma."
+    echo "ERROR: $WEB/index.html.bak-apache ya existe: la ayuda ya se ejecutó."
+    echo "Restaura el estado con ./desinstalar.sh antes de volver a ejecutarla."
     exit 1
 fi
 # Si el laboratorio ya está instalado, la "copia de seguridad" sería la página del
 # laboratorio y desinstalar.sh nunca podría restaurar la original.
 if [[ -e "$MARCADOR" ]] || cmp -s "$WEB/index.html" "$LAB/index.html"; then
-    echo "ERROR: el laboratorio ya está instalado. Ejecuta ./desinstalar.sh antes de grabar."
+    echo "ERROR: el laboratorio ya está instalado. Ejecuta ./desinstalar.sh antes de usar la ayuda."
     exit 1
 fi
 
@@ -52,9 +65,10 @@ for directorio in "$WEB" "$WEB/carpeta" "$WEB/privado"; do
     comprobar_directorio "$directorio"
 done
 comprobar_rutas_ajenas
+avisar_sitio_default
 
-# Si la demo se interrumpe después de la copia de seguridad, se deja el marcador para
-# que ./desinstalar.sh pueda restaurar el estado (y se pueda grabar otra toma).
+# Si la ayuda se interrumpe después de la copia de seguridad, se deja el marcador para
+# que ./desinstalar.sh pueda restaurar el estado (y se pueda volver a empezar).
 dejar_marcador() {
     if [[ -e "$WEB/index.html.bak-apache" ]] || cmp -s "$WEB/index.html" "$LAB/index.html"; then
         escribir_marcador || true
@@ -62,7 +76,7 @@ dejar_marcador() {
 }
 trap dejar_marcador EXIT
 
-# --- Colores para que se lea bien en el vídeo ---
+# --- Colores para que se lea bien en pantalla ---
 VERDE='\e[1;32m'; AMARILLO='\e[1;33m'; AZUL='\e[1;36m'; NORMAL='\e[0m'
 
 # Muestra un título de sección
@@ -80,15 +94,15 @@ ejecuta() {
         sleep "$VELOCIDAD"
     done
     echo
-    eval "$cmd" || true    # || true: si un comando "falla" a propósito, la demo sigue
+    eval "$cmd" || true    # || true: si un comando "falla" a propósito, la ayuda sigue
     echo
     read -rp "↵ Enter para continuar..." _ || true
     echo
 }
 
 # ------------------------------------------------------------------
-titulo "Parte 2: personalizar el index de nginx"
-explica "En el vídeo anterior instalamos nginx. Comprobamos que sigue funcionando:"
+titulo "Montar el laboratorio paso a paso"
+explica "Antes de empezar, comprobamos que nginx está funcionando:"
 ejecuta "systemctl is-active nginx"
 
 # ------------------------------------------------------------------
@@ -132,7 +146,7 @@ explica "Este es el index que preparamos (vemos el principio):"
 ejecuta "head -n 25 $LAB_Q/index.html"
 explica "Lo copiamos con permisos 644: el dueño escribe, todos pueden leer (también nginx)."
 ejecuta "install -m 644 $LAB_Q/index.html $WEB/index.html"
-# Marcador (no se muestra en pantalla) para que ./desinstalar.sh pueda limpiar la demo.
+# Marcador (no se muestra en pantalla) para que ./desinstalar.sh pueda deshacer lo que hace la ayuda.
 escribir_marcador
 ejecuta "curl -s $URL | grep -o '<title>.*</title>'"
 
@@ -154,4 +168,5 @@ ejecuta "for r in / /no-existe.html /carpeta /privado/ /secreto.txt; do echo \"\
 # ------------------------------------------------------------------
 titulo "¡Listo!"
 explica "Abre el navegador en $URL para ver la guía del laboratorio."
-explica "En el próximo vídeo analizaremos cada código de estado con curl."
+explica "Para practicar cada código de estado con curl, sigue los ejercicios de la guía."
+explica "Para comprobarlo todo de una vez: ./verificar.sh"

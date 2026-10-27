@@ -4,6 +4,16 @@ Laboratorio local para aprender y practicar los códigos HTTP `200`, `206`, `301
 `304`, `400`, `403`, `404`, `405` y `416` con **nginx** y **curl**. Está pensado
 para Parrot OS, Debian y distribuciones derivadas.
 
+## Laboratorios de este repositorio
+
+| Laboratorio | Carpeta | De qué trata |
+|---|---|---|
+| Códigos de estado HTTP | esta carpeta (raíz) | Provocar y reconocer los códigos `2xx`, `3xx` y `4xx`. Es el que explica este README. |
+| [Soporte: reparar un 502](soporte-502/README.md) | `soporte-502/` | Diagnosticar y reparar un `502 Bad Gateway` desde el lado de soporte técnico. |
+
+Cada laboratorio tiene sus propios scripts y se instala y desinstala por separado.
+Un solo `git pull` en la carpeta principal actualiza los dos.
+
 ## Qué cambia en el sistema
 
 - Crea `index.html`, `carpeta/`, `privado/`, `secreto.txt` y el marcador
@@ -151,6 +161,7 @@ instalador lo desactivó.
 | `index.html` | Guía visual y ejercicios del laboratorio. |
 | `nginx/lab-nginx-codigos.conf` | Sitio de nginx en `localhost:8080`. |
 | `comun.sh` | Comprobaciones de seguridad compartidas por los scripts. |
+| `soporte-502/` | Laboratorio de soporte para reparar un 502 ([README](soporte-502/README.md)). |
 
 ## Historial del repositorio
 

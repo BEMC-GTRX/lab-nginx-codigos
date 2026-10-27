@@ -1,0 +1,16 @@
+# Servicio de la aplicación del laboratorio lab-nginx-5xx (instalado por instalar.sh).
+# No se habilita al arrancar el equipo: solo funciona mientras practicas.
+[Unit]
+Description=Aplicación de ejemplo del laboratorio lab-nginx-5xx
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 -I /opt/lab-nginx-5xx/app.py
+# Se ejecuta con un usuario temporal sin privilegios y sin acceso de escritura al sistema.
+DynamicUser=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

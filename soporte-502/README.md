@@ -89,22 +89,54 @@ navegador verás la página `502 Bad Gateway` de nginx, y `./verificar.sh` mostr
 
 ### 3. Diagnostica y repara
 
-Investiga como lo haría soporte técnico. Estas preguntas y comandos te llevan a la
-causa; intenta resolverlo antes de mirar la solución:
+Ponte en el lugar de un técnico que llega a un servidor que no conoce. Solo sabes
+lo que dice el usuario: **la URL `http://localhost:8081/` da error**. No sabes qué
+servidor web hay, ni cómo se llama la aplicación, ni dónde están sus registros.
 
-| Pregunta | Comando |
-|---|---|
-| ¿Qué ve el usuario? | `curl -I http://localhost:8081/` |
-| ¿Funciona nginx? | `systemctl is-active nginx` |
-| ¿Qué dice nginx del error? | `sudo tail -n 5 /var/log/nginx/lab-nginx-5xx.error.log` |
-| ¿A dónde envía nginx las peticiones? | `grep proxy_pass /etc/nginx/sites-enabled/lab-nginx-5xx.conf` |
-| ¿Es válida la configuración? | `sudo nginx -t` |
-| ¿Quién escucha en ese puerto? | `sudo ss -ltnp 'sport = :8001'` |
-| ¿En qué estado está el servicio? | `systemctl status lab-nginx-5xx-app --no-pager` |
-| ¿Qué le pasó al servicio? | `sudo journalctl -u lab-nginx-5xx-app -n 20 --no-pager` |
+El método se llama **seguir el camino de la petición**: empiezas por lo que ve el
+usuario y avanzas salto a salto hacia dentro. **Cada dato que usas sale del paso
+anterior**; nunca se adivina un nombre. Y mientras haces el reconocimiento, **no
+cambias nada**: primero entiendes y después reparas.
 
-Cuando creas que lo has arreglado, compruébalo con `./verificar.sh`: debe volver a
-responder `200`.
+Intenta resolverlo antes de mirar la solución. Si te atascas, esta es la cadena
+(`<...>` es lo que descubriste en el paso anterior):
+
+#### Fase 1: reconocimiento
+
+| # | Pregunta | Comando | Qué descubres |
+|---|---|---|---|
+| 1 | ¿Qué ve el usuario? | `curl -I http://localhost:8081/` | El código (`502`) y la cabecera `Server`: quién responde. |
+| 2 | ¿Qué programa atiende el puerto 8081? | `sudo ss -ltnp 'sport = :8081'` | Confirma en el sistema que es nginx (la cabecera se puede falsear). |
+| 3 | ¿Qué sitio de nginx usa ese puerto? | `grep -Rn 'listen.*8081' /etc/nginx/sites-enabled/` | **El archivo de configuración** del sitio. |
+| 4 | ¿Qué hace ese sitio? | `grep -nE 'error_log\|proxy_pass' <archivo>` y `sudo nginx -t` | **Dónde está su registro** y **a qué aplicación** pasa las peticiones (`IP:puerto`). |
+| 5 | ¿Por qué falla? | `sudo tail -n 3 <registro>` | El mensaje de error y **la hora** a la que empezó. |
+| 6 | ¿Hay alguien en el puerto de la aplicación? | `sudo ss -ltnp 'sport = :<puerto>'` | Si nadie escucha, la aplicación está caída. |
+| 7 | ¿Qué servicios propios hay? | `ls /etc/systemd/system/*.service` | Un **sospechoso**: el servicio que parece la aplicación web. |
+| 8 | ¿Qué programa lanza el sospechoso? | `grep ExecStart <servicio>` | **La ruta del programa** de la aplicación. |
+| 9 | ¿Se confirma la sospecha? | `grep -nw <puerto> <programa>`, `systemctl status <servicio>` y `sudo journalctl -u <servicio> -n 5` | Que el programa usa ese puerto, su estado y **cuándo se paró**. |
+
+Tres detalles que marcan la diferencia:
+
+- **`grep -R` y no `-r`** en el paso 3: `sites-enabled/` contiene enlaces
+  simbólicos y `-r` no los sigue. Además, se busca en `sites-enabled/` (lo que está
+  activo) y no en `sites-available/` (lo que existe, esté activo o no).
+- **No busques el puerto por todo el disco** en el paso 7: en un sistema real,
+  `grep -rl 8001 /opt` encuentra decenas de archivos que no tienen nada que ver.
+  Es mejor partir de un sospechoso (los servicios instalados a mano viven en
+  `/etc/systemd/system/`; los de los paquetes, en `/usr/lib/systemd/system/`) y
+  confirmarlo después.
+- **Compara las horas**: si el error del registro de nginx (paso 5) y el `Stopped`
+  del servicio (paso 9) son del mismo segundo, los dos hechos están relacionados.
+
+#### Fases 2 a 5: diagnóstico, solución, verificación y cierre
+
+1. **Diagnóstico:** resume la causa con los datos que has reunido.
+2. **Solución:** el primer cambio en el sistema, y solo el necesario:
+   `sudo systemctl start <servicio>`.
+3. **Verificación:** de dentro hacia fuera: `ss` en el puerto de la aplicación,
+   `curl -I` como el usuario y `./verificar.sh`, que debe responder `200`.
+4. **Cierre:** anota síntoma, causa, solución y prueba, y deja recomendaciones para
+   que no se repita (por ejemplo, revisa `systemctl is-enabled <servicio>`).
 
 ### 4. Si te atascas: la ayuda autoguiada
 
@@ -112,19 +144,18 @@ responder `200`.
 sudo ./ayuda-autoguiada-reparar-502.sh
 ```
 
-Resuelve la avería en 8 pasos. Escribe cada comando, explica qué buscas y espera a
-que pulses Enter antes de seguir:
+Resuelve la avería siguiendo la misma cadena que la guía anterior. Escribe cada
+comando, explica qué buscas y espera a que pulses Enter antes de seguir. Como un
+técnico real, solo parte de la URL del usuario: el archivo de nginx, el registro, el
+puerto y el nombre del servicio los **descubre** con la salida de cada comando, no
+los tiene escritos de antemano.
 
-1. Reproducir el error con `curl -I`.
-2. Comprobar si nginx funciona.
-3. Leer el registro de errores de nginx.
-4. Revisar a dónde envía nginx las peticiones y validar la configuración.
-5. Ver si algún programa escucha en el puerto de la aplicación.
-6. Revisar el estado y el historial del servicio de la aplicación.
-7. Arreglar la causa.
-8. Comprobar que la web vuelve a responder `200 OK`.
-
-Al final muestra un resumen de todo el diagnóstico.
+1. **Reconocimiento** (9 pasos, sin cambiar nada): del `curl -I` del usuario hasta
+   el servicio parado.
+2. **Diagnóstico:** resumen de cada dato y del comando que lo reveló.
+3. **Solución:** arrancar el servicio.
+4. **Verificación:** comprobar cada eslabón hasta ver `200 OK`.
+5. **Cierre:** informe de la incidencia y recomendaciones.
 
 ### 5. Repite
 

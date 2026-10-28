@@ -5,6 +5,9 @@ diagnostica y se repara un error de la familia **5xx**. nginx hace de proxy de u
 pequeña aplicación; cuando la aplicación se cae, los usuarios reciben un
 `502 Bad Gateway`. Tu trabajo es averiguar por qué y volver a levantar el servicio.
 
+Hay un vídeo de este laboratorio: consulta los enlaces en
+[Vídeos del tutorial](../README.md#vídeos-del-tutorial).
+
 ## Qué vas a aprender
 
 - Reproducir el error que reporta un usuario con `curl`.

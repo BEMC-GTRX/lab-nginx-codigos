@@ -14,6 +14,14 @@ para Parrot OS, Debian y distribuciones derivadas.
 Cada laboratorio tiene sus propios scripts y se instala y desinstala por separado.
 Un solo `git pull` en la carpeta principal actualiza los dos.
 
+## Vídeos del tutorial
+
+Los vídeos paso a paso de estos laboratorios están publicados en:
+
+- **YouTube:** <https://www.youtube.com/@localtechlab-d7e>
+- **Instagram:** <https://www.instagram.com/localtechlab502>
+- **Facebook:** <https://www.facebook.com/LocalTechLab502>
+
 ## Qué cambia en el sistema
 
 - Crea `index.html`, `carpeta/`, `privado/`, `secreto.txt` y el marcador

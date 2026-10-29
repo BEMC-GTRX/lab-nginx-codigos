@@ -165,6 +165,59 @@ los tiene escritos de antemano.
 Puedes repetir los pasos 2 a 4 tantas veces como quieras: `romper.sh` vuelve a
 provocar la avería cada vez que la web funciona.
 
+## Demostración adicional: por qué HTTP no es seguro (Man-in-the-Middle)
+
+Además de la página principal, la aplicación publica un **formulario de acceso de
+demostración** en `http://localhost:8081/login`. Simula la banca en línea de un
+**banco ficticio** («Banco Nébula», una entidad que no existe) y sirve para ver, de
+forma visual, por qué **nunca** se deben enviar credenciales por HTTP.
+
+Un ataque **Man-in-the-Middle (MITM)** consiste en situarse entre el usuario y el
+servidor para observar o alterar el tráfico. Cuando la conexión va por HTTP (sin
+cifrar), quien está en medio lee todo en texto plano: usuario, contraseña y la
+cookie de sesión.
+
+### Cómo reproducirlo
+
+Necesitas [mitmproxy](https://mitmproxy.org/). En Parrot/Debian: `sudo apt install mitmproxy`.
+
+1. Con el laboratorio instalado, levanta un **proxy inverso** que se coloque delante
+   de nginx y abra su panel web:
+
+   ```bash
+   mitmweb --mode reverse:http://127.0.0.1:8081 \
+           --listen-host 127.0.0.1 -p 8082 --web-port 8083
+   ```
+
+   - `--mode reverse:...` reenvía todo lo que reciba a la aplicación real (nginx).
+   - `-p 8082` es el puerto por el que entrará la «víctima».
+   - `--web-port 8083` es el panel de mitmproxy (el 8081 lo ocupa nginx).
+   - `--listen-host 127.0.0.1` lo mantiene en tu equipo: nada se expone a la red.
+
+2. En el navegador, entra como haría la víctima en `http://localhost:8082/login` e
+   inicia sesión con las credenciales de demostración:
+
+   | Usuario | Contraseña |
+   |---|---|
+   | `cliente.demo` | `Nebula-Lab-2026` |
+
+3. En el panel de mitmproxy (`http://127.0.0.1:8083`), filtra por `~m POST` y abre la
+   petición de `/login`: verás el usuario y la contraseña **en texto plano**, y en la
+   respuesta la cookie `Set-Cookie` de la sesión.
+
+### Qué aprender de aquí
+
+- El candado dibujado dentro de una página («Conexión segura») **no significa nada**:
+  el cifrado real es el de `https://` y el candado del navegador.
+- Con **HTTPS**, el atacante solo vería datos cifrados. Por eso los sitios serios
+  usan HTTPS y **HSTS** (una política que obliga al navegador a usar siempre HTTPS),
+  y este ataque está obsoleto frente a ellos.
+- Nunca introduzcas credenciales reales en un sitio `http://`.
+
+> **Importante:** esta demostración es solo con fines educativos y sobre tu propio
+> laboratorio local. Interceptar tráfico de otras personas o de sistemas que no son
+> tuyos es ilegal.
+
 ## Cómo funciona por dentro
 
 ```
@@ -255,7 +308,7 @@ sirviendo otros proyectos.
 | `verificar.sh` | Dice si la web funciona o está averiada. No necesita `sudo`. |
 | `ayuda-autoguiada-reparar-502.sh` | Ayuda autoguiada que repara la avería paso a paso. |
 | `desinstalar.sh` | Retira todo lo que instaló el laboratorio. |
-| `app/app.py` | Aplicación de ejemplo (solo biblioteca estándar de Python). |
+| `app/app.py` | Aplicación de ejemplo (solo biblioteca estándar de Python). Incluye el formulario de acceso de demostración en `/login`. |
 | `app/lab-nginx-5xx-app.service` | Servicio de systemd de la aplicación. |
 | `nginx/lab-nginx-5xx.conf` | Sitio de nginx en `localhost:8081` que hace de proxy. |
 | `comun.sh` | Datos y comprobaciones de seguridad compartidas por los scripts. |

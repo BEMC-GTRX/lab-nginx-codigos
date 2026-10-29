@@ -21,26 +21,46 @@ DIRECCION = "127.0.0.1"
 PUERTO = 8001
 
 # Credenciales FALSAS, solo para la demostración del laboratorio.
-USUARIO_DEMO = "victima"
-CLAVE_DEMO = "Lab-Http-2026"
+USUARIO_DEMO = "cliente.demo"
+CLAVE_DEMO = "Nebula-Lab-2026"
+
+# Nombre del banco FICTICIO del laboratorio. No existe y no imita a ningún banco real.
+BANCO = "Banco Nébula"
 
 # Un formulario de login es pequeño: se rechazan cuerpos mayores para no llenar la memoria.
 MAXIMO_CUERPO = 4096
 
+# Aspecto "bancario" (azul corporativo). El banner superior deja claro en todo
+# momento que es un banco ficticio de laboratorio, para que nadie lo confunda con
+# una web real.
 ESTILO = """
   <style>
-    body { font-family: sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px;
-           background: #f5f6f8; color: #222; line-height: 1.5; }
-    h1 { color: #0b6e4f; }
+    body { font-family: Arial, sans-serif; margin: 0; background: #eef1f5; color: #1a2330; }
+    .aviso { background: #b45309; color: #fff; text-align: center; padding: 6px 12px;
+             font-size: 13px; font-weight: bold; }
+    .barra { background: #0a2f66; color: #fff; padding: 16px 24px; }
+    .barra .marca { font-size: 22px; font-weight: bold; letter-spacing: .5px; }
+    .barra .marca span { color: #7fb2ff; }
+    .contenido { max-width: 760px; margin: 32px auto; padding: 0 16px; }
+    h1 { color: #0a2f66; font-size: 22px; }
     code { background: #1e1e1e; color: #9cdcfe; border-radius: 4px; padding: 2px 6px; }
-    form { background: #fff; border-radius: 8px; padding: 24px; max-width: 360px;
-           box-shadow: 0 2px 8px rgba(0, 0, 0, .1); }
-    label { display: block; margin-top: 12px; font-weight: bold; }
-    input { width: 100%; box-sizing: border-box; padding: 8px; margin-top: 4px; font-size: 16px; }
-    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; background: #0b6e4f;
-             color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+    form { background: #fff; border-radius: 10px; padding: 28px; max-width: 360px;
+           box-shadow: 0 2px 10px rgba(10, 47, 102, .12); }
+    label { display: block; margin-top: 14px; font-weight: bold; font-size: 14px; }
+    input { width: 100%; box-sizing: border-box; padding: 10px; margin-top: 4px; font-size: 16px;
+            border: 1px solid #c3ccd8; border-radius: 6px; }
+    button { margin-top: 22px; padding: 11px 22px; font-size: 16px; background: #0a2f66;
+             color: #fff; border: 0; border-radius: 6px; cursor: pointer; width: 100%; }
+    .saldo { background: #fff; border-radius: 10px; padding: 24px; margin-top: 16px;
+             box-shadow: 0 2px 10px rgba(10, 47, 102, .12); }
+    .saldo .cifra { font-size: 30px; color: #0a2f66; font-weight: bold; }
+    .peligro { background: #fde2e2; border-left: 5px solid #b00020; padding: 14px 18px;
+               border-radius: 6px; margin-top: 20px; }
     .error { color: #b00020; font-weight: bold; }
   </style>"""
+
+BANNER = ('  <div class="aviso">BANCO FICTICIO · laboratorio educativo · '
+          'solo funciona en 127.0.0.1 · no es una entidad real</div>\n')
 
 
 def pagina(titulo, cuerpo):
@@ -52,35 +72,47 @@ def pagina(titulo, cuerpo):
   <title>{titulo}</title>{ESTILO}
 </head>
 <body>
+{BANNER}  <div class="barra"><span class="marca">Banco <span>Nébula</span></span></div>
+  <div class="contenido">
 {cuerpo}
+  </div>
 </body>
 </html>
 """.encode("utf-8")
 
 
-PAGINA = pagina("Aplicación del laboratorio 5xx", """  <h1>La aplicación funciona</h1>
+PAGINA = pagina("Banco Nébula", """  <h1>La aplicación funciona</h1>
   <p>nginx ha recibido tu petición y se la ha pasado a la aplicación, que ha respondido
   con <strong>200 OK</strong>.</p>
   <p>Ruta del navegador: <code>localhost:8081</code> &rarr; nginx &rarr;
-  <code>127.0.0.1:8001</code> (aplicación).</p>""")
+  <code>127.0.0.1:8001</code> (aplicación).</p>
+  <p>Para entrar en la banca en línea de demostración: <code>/login</code>.</p>""")
 
 
 def pagina_login(mensaje=""):
-    return pagina("Iniciar sesión", f"""  <h1>Iniciar sesión</h1>
+    return pagina("Banca en línea · Banco Nébula", f"""  <h1>Acceso a tu banca en línea</h1>
   {mensaje}
   <form method="post" action="/login">
     <label for="usuario">Usuario</label>
     <input id="usuario" name="usuario" autocomplete="username">
     <label for="clave">Contraseña</label>
     <input id="clave" name="clave" type="password" autocomplete="current-password">
-    <button type="submit">Entrar</button>
+    <button type="submit">Acceder</button>
   </form>""")
 
 
-PAGINA_BIENVENIDA = pagina("Panel", """  <h1>Bienvenido, victima</h1>
-  <p>Has iniciado sesión correctamente.</p>
-  <p>Pero esta página llegó por <strong>HTTP</strong>: tu usuario, tu contraseña y tu
-  cookie de sesión viajaron sin cifrar.</p>""")
+PAGINA_BIENVENIDA = pagina("Mi cuenta · Banco Nébula", """  <h1>Hola, cliente.demo</h1>
+  <div class="saldo">
+    <p>Saldo disponible en tu cuenta</p>
+    <p class="cifra">12.480,53 €</p>
+    <p>Cuenta ficticia ES00 0000 0000 0000 0000 0000 · solo para la demostración.</p>
+  </div>
+  <div class="peligro">
+    <p><strong>Pero esta página llegó por HTTP.</strong> Tu usuario, tu contraseña y tu
+    cookie de sesión viajaron sin cifrar: cualquiera en medio (por ejemplo, mitmproxy)
+    los acaba de ver en texto plano.</p>
+    <p>Un banco real NUNCA funciona así: usa siempre HTTPS.</p>
+  </div>""")
 
 
 class Manejador(BaseHTTPRequestHandler):

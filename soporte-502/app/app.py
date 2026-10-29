@@ -36,8 +36,8 @@ MAXIMO_CUERPO = 4096
 ESTILO = """
   <style>
     body { font-family: Arial, sans-serif; margin: 0; background: #eef1f5; color: #1a2330; }
-    .aviso { background: #b45309; color: #fff; text-align: center; padding: 6px 12px;
-             font-size: 13px; font-weight: bold; }
+    .aviso { background: #334155; color: #cbd5e1; text-align: center; padding: 3px 12px;
+             font-size: 11px; letter-spacing: .3px; }
     .barra { background: #0a2f66; color: #fff; padding: 16px 24px; }
     .barra .marca { font-size: 22px; font-weight: bold; letter-spacing: .5px; }
     .barra .marca span { color: #7fb2ff; }
@@ -59,8 +59,8 @@ ESTILO = """
     .error { color: #b00020; font-weight: bold; }
   </style>"""
 
-BANNER = ('  <div class="aviso">BANCO FICTICIO · laboratorio educativo · '
-          'solo funciona en 127.0.0.1 · no es una entidad real</div>\n')
+BANNER = ('  <div class="aviso">Laboratorio local Tech Lab · banco ficticio · '
+          'solo 127.0.0.1</div>\n')
 
 
 def pagina(titulo, cuerpo):
